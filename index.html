@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>陀螺儀賽車 3D · Gyro Racer</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { width:100%; height:100%; overflow:hidden; background:#0b0e14;
+    font-family:"PingFang TC","Microsoft JhengHei","Noto Sans TC",system-ui,sans-serif;
+    color:#eaf1ff; user-select:none; -webkit-user-select:none; touch-action:none;
+    overscroll-behavior:none; }
+  #stage { position:fixed; inset:0; }
+  #stage canvas { display:block; width:100%; height:100%; }
+
+  /* ---------- HUD ---------- */
+  #hud { position:fixed; inset:0; pointer-events:none; z-index:5; display:none; }
+  #hud.on { display:block; }
+  .hud-top { position:absolute; top:0; left:0; right:0; display:flex;
+    justify-content:space-between; align-items:flex-start; padding:10px 12px; }
+  .hud-lap { background:rgba(5,9,18,.62); border:1px solid #ffffff22; border-radius:12px;
+    padding:8px 12px; backdrop-filter:blur(4px); }
+  .hud-lap .row { display:flex; gap:14px; align-items:baseline; }
+  .hud-lap .lbl { font-size:10px; letter-spacing:2px; color:#8fa0c8; }
+  .hud-lap .val { font-size:20px; font-weight:800; color:#fff; font-variant-numeric:tabular-nums; }
+  .hud-lap .val.best { color:#ffd75e; }
+  #minimap-wrap { position:relative; }
+  #minimap { width:120px; height:120px; border-radius:12px;
+    background:rgba(5,9,18,.62); border:1px solid #ffffff22; }
+  .hud-btns { position:absolute; top:128px; right:0; display:flex; gap:8px; }
+  .icon-btn { pointer-events:auto; width:44px; height:44px; border-radius:50%;
+    border:1px solid #ffffff33; background:rgba(5,9,18,.66); color:#fff;
+    font-size:20px; display:flex; align-items:center; justify-content:center; }
+  .icon-btn:active { background:rgba(40,60,110,.8); }
+
+  #speed { position:absolute; left:50%; bottom:calc(18px + env(safe-area-inset-bottom));
+    transform:translateX(-50%); text-align:center; }
+  #speed .num { font-size:52px; font-weight:900; color:#fff;
+    text-shadow:0 0 18px #29c7ff88, 0 2px 0 #000; font-variant-numeric:tabular-nums; }
+  #speed .unit { font-size:12px; letter-spacing:3px; color:#8fa0c8; }
+
+  /* 煞車鈕 */
+  #btn-brake { pointer-events:auto; position:absolute; right:22px;
+    bottom:calc(96px + env(safe-area-inset-bottom)); width:104px; height:104px;
+    border-radius:50%; border:3px solid #ff5b5b88; background:rgba(120,10,10,.45);
+    color:#ffd7d7; font-size:18px; font-weight:800; letter-spacing:2px; }
+  #btn-brake.held { background:rgba(255,40,40,.75); color:#fff; }
+
+  /* 備用轉向鈕（無陀螺儀時顯示） */
+  #steer-fallback { position:absolute; left:18px;
+    bottom:calc(96px + env(safe-area-inset-bottom)); display:none; gap:14px; }
+  #steer-fallback.show { display:flex; }
+  #steer-fallback button { pointer-events:auto; width:76px; height:76px; border-radius:50%;
+    border:2px solid #29c7ff88; background:rgba(10,30,60,.5); color:#bfeaff;
+    font-size:30px; }
+  #steer-fallback button.held { background:rgba(41,199,255,.5); }
+
+  #msg { position:absolute; left:50%; top:22%; transform:translateX(-50%);
+    font-size:15px; color:#ffe08a; text-shadow:0 2px 6px #000; text-align:center;
+    background:rgba(5,9,18,.55); padding:8px 16px; border-radius:10px; display:none; }
+
+  /* ---------- 倒數 ---------- */
+  #countdown { position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+    z-index:8; pointer-events:none; }
+  #countdown.show { display:flex; }
+  #countdown span { font-size:120px; font-weight:900; color:#fff;
+    text-shadow:0 0 40px #29c7ff, 0 4px 0 #000; }
+
+  /* ---------- 開始畫面 ---------- */
+  #overlay { position:fixed; inset:0; z-index:10; display:flex; align-items:center;
+    justify-content:center; padding:24px;
+    background:radial-gradient(120% 100% at 50% 0%, #16233f 0%, #0b0e14 70%); }
+  #overlay.hide { display:none; }
+  .card { width:100%; max-width:420px; background:rgba(10,16,30,.9);
+    border:1px solid #29c7ff44; border-radius:20px; padding:28px 24px;
+    box-shadow:0 0 40px #29c7ff22; text-align:center; }
+  .card h1 { font-size:30px; font-weight:900; letter-spacing:2px; margin-bottom:4px; }
+  .card h1 .em { color:#ff5b5b; }
+  .card .sub { font-size:13px; color:#8fa0c8; margin-bottom:18px; letter-spacing:1px; }
+  .howto { text-align:left; font-size:14px; line-height:2; color:#cdd8f2;
+    background:#ffffff08; border-radius:12px; padding:12px 16px; margin-bottom:16px; }
+  .opts { text-align:left; margin-bottom:20px; display:grid; gap:10px; }
+  .opts label { display:flex; align-items:center; gap:10px; font-size:14px; color:#cdd8f2; }
+  .opts input { width:20px; height:20px; accent-color:#29c7ff; }
+  .opts small { display:block; color:#8fa0c8; font-size:12px; margin-left:30px; }
+  #btn-start { width:100%; padding:16px; font-size:20px; font-weight:900; letter-spacing:4px;
+    color:#04121f; background:linear-gradient(180deg,#5fe0ff,#29a8ff); border:none;
+    border-radius:14px; box-shadow:0 6px 24px #29c7ff66; }
+  #btn-start:active { transform:scale(.97); }
+  .perm-note { margin-top:12px; font-size:12px; color:#8fa0c8; line-height:1.7; }
+
+  #errlog { position:fixed; left:8px; bottom:8px; z-index:50; max-width:90vw;
+    max-height:30vh; overflow:auto; display:none; font-size:11px; white-space:pre-wrap;
+    background:rgba(60,0,0,.85); color:#ffb3b3; padding:8px; border-radius:8px; }
+  #errlog.show { display:block; }
+</style>
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+</script>
+</head>
+<body>
+<div id="stage"></div>
+
+<div id="hud">
+  <div class="hud-top">
+    <div class="hud-lap">
+      <div class="row">
+        <div><div class="lbl">LAP</div><div class="val" id="hud-lap">1</div></div>
+        <div><div class="lbl">TIME</div><div class="val" id="hud-time">0:00.0</div></div>
+        <div><div class="lbl">BEST</div><div class="val best" id="hud-best">--:--.-</div></div>
+      </div>
+    </div>
+    <div id="minimap-wrap">
+      <canvas id="minimap" width="240" height="240"></canvas>
+      <div class="hud-btns">
+        <div class="icon-btn" id="btn-sound">🔊</div>
+        <div class="icon-btn" id="btn-reset">↺</div>
+      </div>
+    </div>
+  </div>
+  <div id="speed"><div class="num" id="speed-num">0</div><div class="unit">KM/H</div></div>
+  <div id="steer-fallback">
+    <button id="btn-left">◀</button>
+    <button id="btn-right">▶</button>
+  </div>
+  <button id="btn-brake">煞車</button>
+  <div id="msg"></div>
+</div>
+
+<div id="countdown"><span id="cd-num">3</span></div>
+
+<div id="overlay">
+  <div class="card">
+    <h1>🏎️ <span class="em">陀螺儀</span>賽車 3D</h1>
+    <div class="sub">GYRO RACER · 一台車 · 一條賽道</div>
+    <div class="howto">
+      📱 <b>左右傾斜手機</b>＝ 轉方向盤<br>
+      🚀 自動加速，右下角 <b>煞車</b> 過彎用<br>
+      🏁 無限繞圈，挑戰最速單圈
+    </div>
+    <div class="opts">
+      <label><input type="checkbox" id="opt-auto" checked> 自動加速</label>
+      <label><input type="checkbox" id="opt-invert"> 反轉轉向
+        <small>如果傾斜方向跟轉彎相反，勾這個</small></label>
+    </div>
+    <button id="btn-start">開始遊戲</button>
+    <div class="perm-note">iPhone 點開始後會跳出陀螺儀權限要求，請按「允許」。<br>沒有陀螺儀的裝置會自動顯示 ◀ ▶ 觸控按鈕；電腦可用 ← → 方向鍵。</div>
+  </div>
+</div>
+
+<div id="errlog"></div>
+<script type="module" src="./game.js"></script>
+</body>
+</html>
