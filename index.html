@@ -93,6 +93,21 @@
     max-height:30vh; overflow:auto; display:none; font-size:11px; white-space:pre-wrap;
     background:rgba(60,0,0,.85); color:#ffb3b3; padding:8px; border-radius:8px; }
   #errlog.show { display:block; }
+
+  /* ---------- 橫向 ---------- */
+  @media (orientation: landscape) {
+    .card { max-height:94vh; overflow:auto; padding:20px; }
+    .card h1 { font-size:24px; }
+    .howto { font-size:13px; line-height:1.9; }
+    #speed .num { font-size:38px; }
+    #minimap { width:92px; height:92px; }
+    .hud-btns { top:100px; }
+    .icon-btn { width:40px; height:40px; font-size:18px; }
+    #btn-brake { width:84px; height:84px; right:16px; font-size:15px;
+      bottom:calc(64px + env(safe-area-inset-bottom)); }
+    #steer-fallback { left:14px; bottom:calc(64px + env(safe-area-inset-bottom)); }
+    #steer-fallback button { width:62px; height:62px; font-size:24px; }
+  }
 </style>
 <script type="importmap">
 { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
@@ -134,7 +149,7 @@
     <h1>🏎️ <span class="em">陀螺儀</span>賽車 3D</h1>
     <div class="sub">GYRO RACER · 一台車 · 一條賽道</div>
     <div class="howto">
-      📱 <b>左右傾斜手機</b>＝ 轉方向盤<br>
+      📱 <b>左右傾斜手機</b>＝ 轉方向盤（直向 / 橫向皆可，建議橫向）<br>
       🚀 自動加速，右下角 <b>煞車</b> 過彎用<br>
       🏁 無限繞圈，挑戰最速單圈
     </div>
@@ -144,7 +159,7 @@
         <small>如果傾斜方向跟轉彎相反，勾這個</small></label>
     </div>
     <button id="btn-start">開始遊戲</button>
-    <div class="perm-note">iPhone 點開始後會跳出陀螺儀權限要求，請按「允許」。<br>沒有陀螺儀的裝置會自動顯示 ◀ ▶ 觸控按鈕；電腦可用 ← → 方向鍵。</div>
+    <div class="perm-note">iPhone 點開始後會跳出陀螺儀權限要求，請按「允許」。<br>直向橫向皆可（建議橫向）；沒有陀螺儀的裝置會自動顯示 ◀ ▶ 觸控按鈕；電腦可用 ← → 方向鍵。</div>
   </div>
 </div>
 
