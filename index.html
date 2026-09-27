@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>陀螺儀賽車 3D · Gyro Racer</title>
+<title>陀螺儀賽車 3D · 摩納哥街道賽</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html,body { width:100%; height:100%; overflow:hidden; background:#0b0e14;
@@ -146,12 +146,13 @@
 
 <div id="overlay">
   <div class="card">
-    <h1>🏎️ <span class="em">陀螺儀</span>賽車 3D</h1>
-    <div class="sub">GYRO RACER · 一台車 · 一條賽道</div>
+    <h1>🏎️ <span class="em">摩納哥</span>街道賽</h1>
+    <div class="sub">MONACO STREET CIRCUIT · 3.337 km · F1 風格賽車</div>
     <div class="howto">
       📱 <b>左右傾斜手機</b>＝ 轉方向盤（直向 / 橫向皆可，建議橫向）<br>
       🚀 自動加速，右下角 <b>煞車</b> 過彎用<br>
-      🏁 無限繞圈，挑戰最速單圈
+      🏁 真實摩納哥賽道：Sainte Dévote → 賭場 → 髮夾彎 → 隧道 → 游泳池<br>
+      ⚠️ 街道賽很窄，髮夾彎記得煞車！
     </div>
     <div class="opts">
       <label><input type="checkbox" id="opt-auto" checked> 自動加速</label>
@@ -164,6 +165,7 @@
 </div>
 
 <div id="errlog"></div>
+<script src="./monaco-track.js"></script>
 <script type="module" src="./game.js"></script>
 </body>
 </html>
