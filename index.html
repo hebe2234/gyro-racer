@@ -24,7 +24,7 @@
   .hud-lap .lbl { font-size:10px; letter-spacing:2px; color:#8fa0c8; }
   .hud-lap .val { font-size:20px; font-weight:800; color:#fff; font-variant-numeric:tabular-nums; }
   .hud-lap .val.best { color:#ffd75e; }
-  #minimap-wrap { position:relative; }
+  #minimap-wrap { position:relative; margin-top:46px; } /* 讓位給右上角語言鈕 */
   #minimap { width:120px; height:120px; border-radius:12px;
     background:rgba(5,9,18,.62); border:1px solid #ffffff22; }
   .hud-btns { position:absolute; top:128px; right:0; display:flex; gap:8px; }
@@ -89,6 +89,15 @@
   #btn-start:active { transform:scale(.97); }
   .perm-note { margin-top:12px; font-size:12px; color:#8fa0c8; line-height:1.7; }
 
+  /* ---------- 語言切換（永遠置頂） ---------- */
+  #topbar { position:fixed; top:calc(10px + env(safe-area-inset-top)); right:12px;
+    z-index:60; pointer-events:auto; }
+  #btn-lang { background:rgba(5,9,18,.66); border:1px solid #ffffff33; color:#8fa0c8;
+    border-radius:20px; padding:8px 14px; font-size:13px; letter-spacing:1px;
+    font-family:inherit; backdrop-filter:blur(4px); }
+  #btn-lang [data-langbtn].active { color:#fff; font-weight:800; }
+  #btn-lang:active { background:rgba(40,60,110,.8); }
+
   #errlog { position:fixed; left:8px; bottom:8px; z-index:50; max-width:90vw;
     max-height:30vh; overflow:auto; display:none; font-size:11px; white-space:pre-wrap;
     background:rgba(60,0,0,.85); color:#ffb3b3; padding:8px; border-radius:8px; }
@@ -116,6 +125,8 @@
 <body>
 <div id="stage"></div>
 
+<div id="topbar"><button id="btn-lang" aria-label="Language / 語言"><span data-langbtn="zh">中文</span><span> / </span><span data-langbtn="en">EN</span></button></div>
+
 <div id="hud">
   <div class="hud-top">
     <div class="hud-lap">
@@ -138,7 +149,7 @@
     <button id="btn-left">◀</button>
     <button id="btn-right">▶</button>
   </div>
-  <button id="btn-brake">煞車</button>
+  <button id="btn-brake" data-i18n="brake">煞車</button>
   <div id="msg"></div>
 </div>
 
@@ -146,21 +157,21 @@
 
 <div id="overlay">
   <div class="card">
-    <h1>🏎️ <span class="em">摩納哥</span>街道賽</h1>
-    <div class="sub">MONACO STREET CIRCUIT · 3.337 km · F1 風格賽車</div>
-    <div class="howto">
+    <h1 data-i18n-html="title_h1">🏎️ <span class="em">摩納哥</span>街道賽</h1>
+    <div class="sub" data-i18n="subtitle">MONACO STREET CIRCUIT · 3.337 km · F1 風格賽車</div>
+    <div class="howto" data-i18n-html="howto">
       📱 <b>左右傾斜手機</b>＝ 轉方向盤（直向 / 橫向皆可，建議橫向）<br>
       🚀 自動加速，右下角 <b>煞車</b> 過彎用<br>
       🏁 真實摩納哥賽道：Sainte Dévote → 賭場 → 髮夾彎 → 隧道 → 游泳池<br>
       ⚠️ 街道賽很窄，髮夾彎記得煞車！
     </div>
     <div class="opts">
-      <label><input type="checkbox" id="opt-auto" checked> 自動加速</label>
-      <label><input type="checkbox" id="opt-invert"> 反轉轉向
-        <small>如果傾斜方向跟轉彎相反，勾這個</small></label>
+      <label><input type="checkbox" id="opt-auto" checked> <span data-i18n="opt_auto">自動加速</span></label>
+      <label><input type="checkbox" id="opt-invert"> <span data-i18n="opt_invert">反轉轉向</span>
+        <small data-i18n="opt_invert_note">如果傾斜方向跟轉彎相反，勾這個</small></label>
     </div>
-    <button id="btn-start">開始遊戲</button>
-    <div class="perm-note">iPhone 點開始後會跳出陀螺儀權限要求，請按「允許」。<br>直向橫向皆可（建議橫向）；沒有陀螺儀的裝置會自動顯示 ◀ ▶ 觸控按鈕；電腦可用 ← → 方向鍵。</div>
+    <button id="btn-start" data-i18n="start">開始遊戲</button>
+    <div class="perm-note" data-i18n-html="perm_note">iPhone 點開始後會跳出陀螺儀權限要求，請按「允許」。<br>直向橫向皆可（建議橫向）；沒有陀螺儀的裝置會自動顯示 ◀ ▶ 觸控按鈕；電腦可用 ← → 方向鍵。</div>
   </div>
 </div>
 

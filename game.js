@@ -20,6 +20,79 @@ if (params.get('debug') === '1') errBox.classList.add('show');
 const $ = id => document.getElementById(id);
 const clamp = (v, a, b) => v < a ? a : (v > b ? b : v);
 
+// ---------- i18n：繁體中文 / 英文 ----------
+const I18N = {
+  zh: {
+    title: '陀螺儀賽車 3D · 摩納哥街道賽',
+    brake: '煞車',
+    title_h1: '🏎️ <span class="em">摩納哥</span>街道賽',
+    subtitle: 'MONACO STREET CIRCUIT · 3.337 km · F1 風格賽車',
+    howto: '📱 <b>左右傾斜手機</b>＝ 轉方向盤（直向 / 橫向皆可，建議橫向）<br>' +
+      '🚀 自動加速，右下角 <b>煞車</b> 過彎用<br>' +
+      '🏁 真實摩納哥賽道：Sainte Dévote → 賭場 → 髮夾彎 → 隧道 → 游泳池<br>' +
+      '⚠️ 街道賽很窄，髮夾彎記得煞車！',
+    opt_auto: '自動加速',
+    opt_invert: '反轉轉向',
+    opt_invert_note: '如果傾斜方向跟轉彎相反，勾這個',
+    start: '開始遊戲',
+    perm_note: 'iPhone 點開始後會跳出陀螺儀權限要求，請按「允許」。<br>' +
+      '直向橫向皆可（建議橫向）；沒有陀螺儀的裝置會自動顯示 ◀ ▶ 觸控按鈕；電腦可用 ← → 方向鍵。',
+    msg_reset: '已重置回賽道',
+    msg_fastest: lt => `🏁 最速單圈 ${lt}！`,
+    msg_lap: lt => `單圈 ${lt}`,
+  },
+  en: {
+    title: 'Gyro Racer 3D · Monaco Street Circuit',
+    brake: 'BRAKE',
+    title_h1: '🏎️ <span class="em">Monaco</span> Street Race',
+    subtitle: 'MONACO STREET CIRCUIT · 3.337 km · F1-Style Car',
+    howto: '📱 <b>Tilt your phone left / right</b> to steer (portrait or landscape, landscape recommended)<br>' +
+      '🚀 Auto-accelerate; use <b>BRAKE</b> (bottom right) for corners<br>' +
+      '🏁 Real Monaco circuit: Sainte Dévote → Casino → Hairpin → Tunnel → Swimming Pool<br>' +
+      '⚠️ Narrow street circuit — brake for the hairpin!',
+    opt_auto: 'Auto-accelerate',
+    opt_invert: 'Invert steering',
+    opt_invert_note: 'Check this if tilting feels reversed',
+    start: 'START RACE',
+    perm_note: 'On iPhone, tap Start and allow the gyroscope permission when prompted.<br>' +
+      'Portrait or landscape both work (landscape recommended); devices without a gyroscope get ◀ ▶ touch buttons automatically; on desktop use the ← → arrow keys.',
+    msg_reset: 'Reset to track',
+    msg_fastest: lt => `🏁 Fastest lap ${lt}!`,
+    msg_lap: lt => `Lap ${lt}`,
+  },
+};
+
+let lang = 'en';
+try {
+  lang = localStorage.getItem('gr_lang') ||
+    ((navigator.language || '').toLowerCase().startsWith('zh') ? 'zh' : 'en');
+} catch (e) { /* localStorage 不可用就用預設英文 */ }
+if (lang !== 'zh') lang = 'en';
+
+function tr(key, arg) {
+  const v = I18N[lang][key];
+  return typeof v === 'function' ? v(arg) : v;
+}
+function setLang(l) {
+  lang = l === 'zh' ? 'zh' : 'en';
+  try { localStorage.setItem('gr_lang', lang); } catch (e) {}
+  document.documentElement.lang = lang === 'zh' ? 'zh-Hant' : 'en';
+  document.title = I18N[lang].title;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const v = I18N[lang][el.getAttribute('data-i18n')];
+    if (typeof v === 'string') el.textContent = v;
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const v = I18N[lang][el.getAttribute('data-i18n-html')];
+    if (typeof v === 'string') el.innerHTML = v;
+  });
+  document.querySelectorAll('#btn-lang [data-langbtn]').forEach(el => {
+    el.classList.toggle('active', el.getAttribute('data-langbtn') === lang);
+  });
+}
+$('btn-lang').addEventListener('click', () => setLang(lang === 'zh' ? 'en' : 'zh'));
+setLang(lang);
+
 // ---------- 程序化紋理 ----------
 function canvasTex(w, h, draw) {
   const c = document.createElement('canvas');
@@ -838,7 +911,7 @@ $('btn-sound').addEventListener('click', () => {
 $('btn-reset').addEventListener('click', () => {
   const s = nearestSample(S.pos, true);
   placeOnTrack(samples.indexOf(s) / SAMPLES, 0);
-  flashMsg('已重置回賽道');
+  flashMsg(tr('msg_reset'));
 });
 
 // ---------- HUD / 小地圖 ----------
@@ -993,9 +1066,9 @@ function step(dt) {
         S.lapStart = S.raceTime;
         if (S.best == null || lt < S.best) {
           S.best = lt;
-          flashMsg(`🏁 最速單圈 ${fmt(lt)}！`);
+          flashMsg(tr('msg_fastest', fmt(lt)));
         } else {
-          flashMsg(`單圈 ${fmt(lt)}`);
+          flashMsg(tr('msg_lap', fmt(lt)));
         }
         S.passedMid = false;
       }
